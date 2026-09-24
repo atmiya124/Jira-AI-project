@@ -1,9 +1,4 @@
-import { prisma } from "@/lib/db/prisma";
-
-function startOfToday(): Date {
-  const now = new Date();
-  return new Date(now.getFullYear(), now.getMonth(), now.getDate());
-}
+import type { SummaryCounts } from "@/lib/dashboard/queries";
 
 function StatCard({ label, value }: { label: string; value: number }) {
   return (
@@ -14,26 +9,7 @@ function StatCard({ label, value }: { label: string; value: number }) {
   );
 }
 
-export async function SummaryCards() {
-  const today = startOfToday();
-
-  const [needsReview, processedToday, postedToday] = await Promise.all([
-    prisma.analysis.count({
-      where: {
-        pipelineType: "rag",
-        triggerSource: "auto",
-        reviewedAt: null,
-        commentPosted: false,
-      },
-    }),
-    prisma.analysis.count({
-      where: { pipelineType: "rag", triggerSource: "auto", createdAt: { gte: today } },
-    }),
-    prisma.analysis.count({
-      where: { commentPosted: true, commentPostedAt: { gte: today } },
-    }),
-  ]);
-
+export function SummaryCards({ needsReview, processedToday, postedToday }: SummaryCounts) {
   return (
     <div className="grid grid-cols-3 gap-3">
       <StatCard label="Needs Review" value={needsReview} />
