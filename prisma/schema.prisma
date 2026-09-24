@@ -4,8 +4,9 @@ generator client {
 }
 
 datasource db {
-  provider = "sqlite"
-  url      = env("DATABASE_URL")
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
 }
 
 model Analysis {
@@ -39,8 +40,32 @@ model Analysis {
   commentPostedAt      DateTime?
   jiraCommentId         String?
 
+  // Set to ticketKey ONLY when pipelineType="rag" && triggerSource="auto",
+  // left null otherwise. Postgres treats multiple NULLs as non-colliding
+  // under a UNIQUE constraint, so this enforces "at most one auto-RAG
+  // analysis per ticket" at the database level (race-safe against
+  // concurrent webhook deliveries/watcher overlap) without constraining
+  // manual re-analysis versioning, which intentionally allows multiple rows
+  // per ticketKey.
+  autoDedupeKey        String?   @unique
+
   @@index([ticketKey])
   @@index([createdAt])
+}
+
+// Singleton row (fixed id "default") holding this app's Atlassian OAuth
+// tokens for the production JiraProvider. Personal/single-tenant tool, so
+// one row is sufficient - no per-user table needed.
+model AtlassianOAuthToken {
+  id           String   @id @default("default")
+
+  accessToken  String
+  refreshToken String
+  cloudId      String
+  siteUrl      String
+
+  expiresAt    DateTime
+  updatedAt    DateTime @updatedAt
 }
 
 model KnowledgeDocument {

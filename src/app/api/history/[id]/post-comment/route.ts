@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 import { prisma } from "@/lib/db/prisma";
-import { postJiraCommentViaTwg as postJiraComment } from "@/lib/jira/twg/client";
+import { getJiraProvider } from "@/lib/jira/provider";
 import { JiraApiError } from "@/lib/jira/errors";
 import { errorResponse, jiraErrorResponse } from "@/lib/apiError";
 
@@ -27,7 +27,7 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
 
   let posted;
   try {
-    posted = await postJiraComment(record.ticketKey, commentText);
+    posted = await getJiraProvider().postComment(record.ticketKey, commentText);
   } catch (err) {
     if (err instanceof JiraApiError) return jiraErrorResponse(err);
     throw err;
