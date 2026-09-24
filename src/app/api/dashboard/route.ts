@@ -1,6 +1,11 @@
 import { NextResponse } from "next/server";
 import { getSummaryCounts, getNeedsReviewPreview, getRecentActivity } from "@/lib/dashboard/queries";
 
+// Without this, Next.js can statically cache this GET route in production
+// (no dynamic API usage of its own to signal otherwise), freezing every
+// poll at whatever it returned first instead of reflecting new data.
+export const dynamic = "force-dynamic";
+
 const DASHBOARD_PREVIEW_LIMIT = 5;
 const RECENT_ACTIVITY_LIMIT = 6;
 
