@@ -12,15 +12,24 @@
   --font-mono: var(--font-geist-mono);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
-}
-
 body {
   background: var(--background);
   color: var(--foreground);
   font-family: Arial, Helvetica, sans-serif;
+}
+
+@keyframes shimmer {
+  0% {
+    background-position: -400px 0;
+  }
+  100% {
+    background-position: 400px 0;
+  }
+}
+
+.shimmer {
+  background-color: #e4e4e7;
+  background-image: linear-gradient(90deg, #e4e4e7 25%, #f4f4f5 37%, #e4e4e7 63%);
+  background-size: 400px 100%;
+  animation: shimmer 1.4s ease-in-out infinite;
 }

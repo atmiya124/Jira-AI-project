@@ -1,0 +1,79 @@
+generator client {
+  provider = "prisma-client-js"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model Analysis {
+  id                  String    @id @default(cuid())
+
+  ticketKey           String
+  ticketUrl           String
+  ticketSummary       String
+  ticketDescription   String
+  ticketStatus        String?
+  ticketType          String?
+
+  model               String
+
+  pipelineType        String    @default("legacy") // "legacy" | "rag"
+  triggerSource        String    @default("manual") // "manual" | "auto"
+
+  analysisJson         String?
+  draftComment         String
+  estimatedComplexity  String?
+
+  // Phase 6: populated only for pipelineType "rag" rows
+  enrichedRequestJson  String?
+  retrievalContextJson String?
+  groundedResponseJson String?
+  confidence           String?
+
+  createdAt           DateTime  @default(now())
+  reviewedAt           DateTime?
+  commentPosted        Boolean   @default(false)
+  commentPostedAt      DateTime?
+  jiraCommentId         String?
+
+  @@index([ticketKey])
+  @@index([createdAt])
+}
+
+model KnowledgeDocument {
+  id          String   @id @default(cuid())
+
+  source      String
+  sourceId    String
+  title       String
+  sourceUrl   String?
+  updatedAt   DateTime?
+  contentHash String
+  ingestedAt  DateTime @default(now())
+
+  chunks      KnowledgeChunk[]
+
+  @@unique([source, sourceId], name: "source_sourceId")
+}
+
+model KnowledgeChunk {
+  id             String   @id @default(cuid())
+
+  documentId     String
+  document       KnowledgeDocument @relation(fields: [documentId], references: [id], onDelete: Cascade)
+
+  chunkIndex     Int
+  section        String?
+  text           String
+  tokenCount     Int?
+
+  embedding      String
+  embeddingModel String
+
+  createdAt      DateTime @default(now())
+
+  @@index([documentId])
+}
