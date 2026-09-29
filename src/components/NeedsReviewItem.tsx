@@ -34,7 +34,9 @@ export function NeedsReviewItem({
       <p className="line-clamp-2 text-zinc-600">{ticketSummary}</p>
       <div className="flex items-center justify-between gap-2">
         <ConfidenceBadge confidence={confidence ?? "low"} size="sm" />
-        <span className="text-xs text-zinc-400">{createdAt.toLocaleString()}</span>
+        <span className="text-xs text-zinc-400" suppressHydrationWarning>
+          {createdAt.toLocaleString()}
+        </span>
       </div>
       <div className="flex justify-end">
         <span className="text-xs font-medium text-zinc-700">Review →</span>
